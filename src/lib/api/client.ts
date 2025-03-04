@@ -1,7 +1,7 @@
 import { HTTPError, Recipe, User, UserFavorite, GetFavoritesByUserRow } from "@/types";
 
 // Use relative URLs for our Next.js API routes
-const API_BASE_URL = "/api";
+const API_BASE_URL = "https://gourmet.cours.quimerch.com";
 
 /**
  * Custom fetch function to interact with the Gourmet API via our Next.js API routes
