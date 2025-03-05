@@ -50,6 +50,6 @@ export interface HTTPError {
   errors?: Array<{
     name: string;
     reason: string;
-    more: Record<string, any>;
+    more: Record<string, never>;
   }>;
 }
