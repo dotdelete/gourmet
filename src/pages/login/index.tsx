@@ -1,7 +1,13 @@
-import {useState, FormEvent, ReactElement} from 'react';
+import { useState, FormEvent, ReactElement } from 'react';
 import { useRouter } from 'next/router';
+import { signIn } from 'next-auth/react';
 import { authApi } from "@/lib/api/client";
 import PageLayout from "@/components/layout/PageLayout";
+
+type CustomError = {
+    type?: string;
+    message?: string;
+};
 
 export default function LoginPage(): ReactElement {
     const router = useRouter();
@@ -14,27 +20,38 @@ export default function LoginPage(): ReactElement {
         setLoading(true);
 
         const formData = new FormData(event.currentTarget);
-        const email = formData.get('email');
-        const password = formData.get('password');
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
 
-        const response = await authApi.login(
-            {
-                username: JSON.stringify(email),
-                password: JSON.stringify(password)
+        try {
+            const response = await authApi.login({ username: email, password });
+
+            if (response.token) {
+                const result = await signIn('credentials', {
+                    redirect: false,
+                    email,
+                    password,
+                });
+
+                if (result?.error) {
+                    setError(result.error);
+                } else {
+                    await router.push('/profile');
+                }
+            } else {
+                setError('Invalid email or password');
             }
-        );
-        // const response = await fetch('/api/auth/login', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ email, password }),
-        // });
-
-        setLoading(false);
-
-        if (response.token) {
-            await router.push('/profile');
-        } else {
-            setError('Invalid email or password');
+        } catch (error) {
+            const customError = error as CustomError;
+            if (customError.type === 'CredentialsSignin') {
+                setError('Invalid credentials.');
+                // res.status(401).json({ error: 'Invalid credentials.' });
+            } else {
+                setError('An unexpected error occurred');
+                // res.status(500).json({ error: 'Something went wrong.' });
+            }
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -93,5 +110,5 @@ LoginPage.getLayout = function getLayout(page: ReactElement) {
         <PageLayout>
             {page}
         </PageLayout>
-    )
-}
+    );
+};
