@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import NavbarWithSearch from "@/components/layout/NavbarWithSearch";
-import Footer from "@/components/layout/Footer";
+import NavbarWithSearch from '@/components/layout/NavbarWithSearch';
+import Footer from '@/components/layout/Footer';
 
-export default function HomePageLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode
-}) {
+interface HomePageLayoutProps {
+    children: React.ReactElement<{ searchQuery?: string }>;
+}
+
+export default function HomePageLayout({ children }: HomePageLayoutProps) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleSearch = (query: string) => {
@@ -17,9 +17,9 @@ export default function HomePageLayout({
         <div className="flex flex-col min-h-screen">
             <NavbarWithSearch onSearch={handleSearch} />
             <main className="flex-grow container mx-auto px-4 py-8">
-                {React.cloneElement(children as React.ReactElement, { searchQuery })}
+                {React.cloneElement(children, { searchQuery })}
             </main>
             <Footer />
         </div>
-    )
+    );
 }

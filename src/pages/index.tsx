@@ -41,5 +41,5 @@ export default function Home({ searchQuery }: { searchQuery: string }) {
 }
 
 Home.getLayout = function getLayout(page: ReactElement) {
-    return <HomePageLayout>{page}</HomePageLayout>;
+    return <HomePageLayout>{page as ReactElement<{searchQuery?: string}>}</HomePageLayout>;
 };

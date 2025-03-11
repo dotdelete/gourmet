@@ -45,10 +45,8 @@ export default function LoginPage(): ReactElement {
             const customError = error as CustomError;
             if (customError.type === 'CredentialsSignin') {
                 setError('Invalid credentials.');
-                // res.status(401).json({ error: 'Invalid credentials.' });
             } else {
                 setError('An unexpected error occurred');
-                // res.status(500).json({ error: 'Something went wrong.' });
             }
         } finally {
             setLoading(false);
