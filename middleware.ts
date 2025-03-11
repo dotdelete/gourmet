@@ -1,41 +1,37 @@
-import { NextRequest, NextResponse } from 'next/server'
-// import { decrypt } from '@/app/lib/session'
-import { cookies } from 'next/headers'
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-// 1. Specify protected and public routes
-const protectedRoutes = ['/favorites']
-const publicRoutes = ['/login', '/']
+export default withAuth(
+    function middleware(req) {
+        // Add custom headers if needed
+        const requestHeaders = new Headers(req.headers);
+        const token = req.nextauth?.token?.accessToken;
 
-export default async function middleware(req: NextRequest) {
-    // 2. Check if the current route is protected or public
-    const path = req.nextUrl.pathname
-    const isProtectedRoute = protectedRoutes.includes(path)
-    const isPublicRoute = publicRoutes.includes(path)
+        if (token) {
+            requestHeaders.set("Authorization", `Bearer ${token}`);
+        }
 
-    // 3. Decrypt the session from the cookie
-    // const cookie = (await cookies()).get('session')?.value
-    // const session = await decrypt(cookie)
-
-    const session = (await cookies()).get('session')?.value
-
-    // 4. Redirect to /login if the user is not authenticated
-    if (isProtectedRoute && !session) {
-        return NextResponse.redirect(new URL('/login', req.nextUrl))
+        return NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        });
+    },
+    {
+        callbacks: {
+            authorized: ({ token }) => !!token,
+        },
     }
+);
 
-    // 5. Redirect to /dashboard if the user is authenticated
-    if (
-        isPublicRoute &&
-        session &&
-        !req.nextUrl.pathname.startsWith('/dashboard')
-    ) {
-        return NextResponse.redirect(new URL('/', req.nextUrl))
-    }
-
-    return NextResponse.next()
-}
-
-// Routes Middleware should not run on
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
-}
+    matcher: [
+        // Protected routes
+        "/me",
+        "favorites",
+        "/profile",
+        "/api/protected/:path*",
+        // Exclude auth routes
+        "/((?!api/auth|login|_next/static|_next/image|favicon.ico).*)",
+    ],
+};

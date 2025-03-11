@@ -64,7 +64,7 @@ export default function Profile() {
                 )}
 
                 <div className="md:flex">
-                    <div className="md:shrink-0 bg-gradient-to-r from-blue-500 to-purple-600 p-6 flex items-center justify-center">
+                    <div className="md:shrink-0 bg-gradient-to-r from-orange-300 to-orange-500 p-6 flex items-center justify-center">
                         <div className="h-24 w-24 rounded-full bg-white/30 flex items-center justify-center text-white text-4xl font-bold">
                             {userData?.full_name ? userData.full_name.charAt(0).toUpperCase() : '?'}
                         </div>
