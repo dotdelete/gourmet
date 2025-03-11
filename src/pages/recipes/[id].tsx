@@ -4,6 +4,7 @@ import { Recipe } from "@/types";
 import { recipesApi } from "@/lib/api/client";
 import PageLayout from "@/components/layout/PageLayout";
 import { ClockIcon, UsersIcon, TagIcon, CalendarIcon, DollarSignIcon, ActivityIcon } from "lucide-react";
+import Image from "next/image";
 
 interface RecipeDetailsProps {
     recipe: Recipe;
@@ -25,7 +26,7 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe }) => {
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Hero Section with Overlay */}
                 <div className="relative h-96 rounded-xl overflow-hidden shadow-xl mb-8">
-                    <img
+                    <Image
                         src={recipe.image_url}
                         alt={recipe.name}
                         className="w-full h-full object-cover"

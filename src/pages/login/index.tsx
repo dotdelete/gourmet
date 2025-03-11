@@ -1,53 +1,50 @@
 import { useState, FormEvent, ReactElement } from 'react';
 import { useRouter } from 'next/router';
-import { signIn } from 'next-auth/react';
-import { authApi } from "@/lib/api/client";
 import PageLayout from "@/components/layout/PageLayout";
-
-type CustomError = {
-    type?: string;
-    message?: string;
-};
+import { signIn, getSession } from 'next-auth/react';
+import Cookies from 'js-cookie';
 
 export default function LoginPage(): ReactElement {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
+    // In your login page (index.tsx)
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setError(null);
         setLoading(true);
 
         const formData = new FormData(event.currentTarget);
-        const email = formData.get('email') as string;
+        const username = formData.get('username') as string;
         const password = formData.get('password') as string;
 
         try {
-            const response = await authApi.login({ username: email, password });
+            const result = await signIn('credentials', {
+                redirect: false,
+                username,
+                password,
+            });
 
-            if (response.token) {
-                const result = await signIn('credentials', {
-                    redirect: false,
-                    email,
-                    password,
-                });
-
-                if (result?.error) {
-                    setError(result.error);
-                } else {
-                    await router.push('/profile');
+            if (result?.error) {
+                setError("Invalid username or password");
+                console.error("Login error:", result.error);
+            } else if (result?.ok) {
+                // Get the session to access the token
+                const session = await getSession();
+                if (session?.accessToken) {
+                    // Set the token in a cookie
+                    Cookies.set("auth_token", `Bearer ${session.accessToken}`, {
+                        expires: 7,
+                        sameSite: "strict",
+                        path: "/"
+                    });
                 }
-            } else {
-                setError('Invalid email or password');
+                await router.push('/profile');
             }
         } catch (error) {
-            const customError = error as CustomError;
-            if (customError.type === 'CredentialsSignin') {
-                setError('Invalid credentials.');
-            } else {
-                setError('An unexpected error occurred');
-            }
+            console.error("Unexpected error:", error);
+            setError('An unexpected error occurred');
         } finally {
             setLoading(false);
         }
@@ -62,11 +59,11 @@ export default function LoginPage(): ReactElement {
 
                 <form onSubmit={handleSubmit} className="mt-4">
                     <div className="mb-4">
-                        <label className="block text-gray-700 font-semibold mb-1">Email</label>
+                        <label className="block text-gray-700 font-semibold mb-1">Username</label>
                         <input
-                            type="email"
-                            name="email"
-                            placeholder="Enter your email"
+                            type="text"
+                            name="username"
+                            placeholder="Enter your username"
                             required
                             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -91,13 +88,6 @@ export default function LoginPage(): ReactElement {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
-
-                <p className="mt-4 text-center text-gray-600">
-                    No account?{' '}
-                    <a href="/register" className="text-blue-500 font-semibold hover:underline">
-                        Sign up
-                    </a>
-                </p>
             </div>
         </div>
     );
