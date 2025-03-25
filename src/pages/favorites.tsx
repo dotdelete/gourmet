@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useRef, useState } from "react";
 import RecipeCard from "@/components/RecipeCard";
 import { Recipe } from "@/types";
 import { favoritesApi, recipesApi } from "@/lib/api/client";
-import { ChevronDown, Loader2 } from "lucide-react";
+import {  Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import PageLayout from "@/components/layout/PageLayout";
@@ -12,7 +12,7 @@ export default function FavoritesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const recipeGridRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -25,7 +25,7 @@ export default function FavoritesPage() {
         try {
           setIsLoading(true);
           const favorites = await favoritesApi.getMyFavorites();
-          const recipePromises = favorites.map((fav) =>
+          const recipePromises = (favorites ?? []).map((fav) =>
             recipesApi.getById(fav.recipe.id.toString())
           );
           const recipes = await Promise.all(recipePromises);
@@ -64,7 +64,7 @@ export default function FavoritesPage() {
             </div>
           ) : favoriteRecipes.length === 0 ? (
             <div className="text-center text-gray-500 py-12">
-              Vous n'avez pas encore de recettes favorites
+              {"Vous n'avez pas encore de recettes favorites"}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
