@@ -63,7 +63,7 @@ export default function Home({ searchQuery }: { searchQuery: string }) {
           <button 
             onClick={scrollToRecipes}
             className="animate-bounce bg-white/20 hover:bg-white/30 transition-all 
-                       rounded-full p-4 group"
+                       rounded-full p-4 group focus:cursor-pointer focus:outline-none"
             aria-label="Scroll to Recipes"
           >
             <ChevronDown 

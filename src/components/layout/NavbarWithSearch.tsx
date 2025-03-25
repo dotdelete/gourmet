@@ -1,6 +1,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
+import { SearchIcon } from "@/components/icons";
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -12,68 +13,94 @@ export default function Navbar({ onSearch }: NavbarProps) {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    onSearch(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(searchQuery);
   };
 
   return (
-    <header className="bg-white shadow-md">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link
-          className="mt-2 inline-block bg-linear-to-r/oklab
-          from-orange-300 to-orange-500
-          bg-clip-text font-serif text-2xl font-bold italic text-transparent md:mt-0"
-          href="/"
-          hx-boost="true"
-          hx-target="#page"
-          hx-select="#page"
-          hx-swap="outerHTML show:window:top"
-        >
-          Gourmet
-        </Link>
-        <input
-          className="h-full w-64 max-w-[90vh] rounded-full border border-stone-200
-          dark:border-stone-800 p-2 px-4 text-stone-500 dark:text-zinc-400
-          hover:bg-stone-100 dark:hover:bg-stone-700 dark:bg-zinc-600 focus:border-transparent
-          focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-          type="text"
-          id="searchInput"
-          name="q"
-          placeholder="orange, crème brulée..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
-        <nav className="flex items-center space-x-6">
-          {session ? (
-            <>
-              <Link
-                href="/profile"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Profile
-              </Link>
-              <Link
-                href="/favorites"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Favoris
-              </Link>
-              <button
-                onClick={() => signOut()}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => signIn()}
-              className="text-gray-600 hover:text-gray-900"
+    <>
+      {/* Fixed header */}
+      <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-20">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <Link
+            className="inline-block bg-linear-to-r/oklab
+            from-orange-300 to-orange-500
+            bg-clip-text font-serif text-2xl font-bold italic text-transparent"
+            href="/"
+            hx-boost="true"
+            hx-target="#page"
+            hx-select="#page"
+            hx-swap="outerHTML show:window:top"
+          >
+            Gourmet
+          </Link>
+
+          <div className="flex-1 max-w-xl mx-4">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="relative flex items-center"
             >
-              Login
-            </button>
-          )}
-        </nav>
-      </div>
-    </header>
+              <input
+                className="h-10 w-full rounded-md border border-gray-300
+                p-2 px-4 pr-12 text-gray-600
+                hover:border-gray-400 focus:outline-none focus:border-orange-300
+                focus:ring-0"
+                type="text"
+                id="searchInput"
+                name="q"
+                placeholder="Search for recipes..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              <button
+                type="submit"
+                className="absolute right-0 h-10 w-10 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-r-md"
+                aria-label="Search"
+              >
+                <SearchIcon className="h-5 w-5" />
+              </button>
+            </form>
+          </div>
+
+          <nav className="flex items-center space-x-6">
+            {session ? (
+              <>
+                <Link
+                  href="/profile"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Profile
+                </Link>
+                <Link
+                  href="/favorites"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Favoris
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => signIn()}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Login
+              </button>
+            )}
+          </nav>
+        </div>
+      </header>
+
+      {/* Spacer div to prevent content from hiding under the fixed navbar */}
+      <div className="h-[72px]"></div>
+    </>
   );
 }
