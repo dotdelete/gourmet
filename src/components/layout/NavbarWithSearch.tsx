@@ -1,6 +1,6 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { SearchIcon } from "@/components/icons";
 
 interface NavbarProps {
@@ -10,6 +10,36 @@ interface NavbarProps {
 export default function Navbar({ onSearch }: NavbarProps) {
   const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [shortcutText, setShortcutText] = useState("⌘K");
+  
+  // Déplacer la détection du système vers useEffect pour éviter les erreurs d'hydratation
+  useEffect(() => {
+    // Déterminer le système d'exploitation pour afficher le bon raccourci
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    setShortcutText(isMac ? '⌘K' : 'Ctrl+K');
+    
+    // Gérer le raccourci clavier pour focus la recherche
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for CMD+K or CTRL+K
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Gestionnaire pour la touche Échap
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      searchInputRef.current?.blur();
+    }
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -37,13 +67,11 @@ export default function Navbar({ onSearch }: NavbarProps) {
           >
             Gourmet
           </Link>
-
-          <div className="flex-1 max-w-xl mx-4">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative flex items-center"
-            >
+          
+          <div className="flex-1 max-w-xl mx-4 relative">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
+                ref={searchInputRef}
                 className="h-10 w-full rounded-md border border-gray-300
                 p-2 px-4 pr-12 text-gray-600
                 hover:border-gray-400 focus:outline-none focus:border-orange-300
@@ -54,8 +82,14 @@ export default function Navbar({ onSearch }: NavbarProps) {
                 placeholder="Search for recipes..."
                 value={searchQuery}
                 onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
               />
-              <button
+              <div className="absolute right-12 flex items-center pointer-events-none">
+                <span className="text-xs text-gray-400 border border-gray-300 rounded px-1">
+                  {shortcutText}
+                </span>
+              </div>
+              <button 
                 type="submit"
                 className="absolute right-0 h-10 w-10 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-r-md"
                 aria-label="Search"
