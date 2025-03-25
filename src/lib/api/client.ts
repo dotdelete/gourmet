@@ -109,10 +109,24 @@ export const authApi = {
       body: JSON.stringify(credentials),
       headers: { "Content-Type": "application/json" },
     });
+    // Decode token to extract expiration if available
+    let expires: number | Date = 7; // Default fallback expiration in days
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(atob(base64));
+
+      if (payload && payload.exp) {
+        // Convert exp (seconds since epoch) to Date object
+        expires = new Date(payload.exp * 1000);
+      }
+    } catch (e) {
+      console.warn("Could not decode token for expiration date", e);
+    }
 
     // Store the token in a cookie - format must match what your API expects
     Cookies.set("auth_token", `Bearer ${token}`, {
-      expires: 7,
+      expires,
       sameSite: "strict",
       path: "/",
     });
