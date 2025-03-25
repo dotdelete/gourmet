@@ -19,6 +19,9 @@ export default function Navbar() {
                             <Link href="/profile" className="text-gray-600 hover:text-gray-900">
                                 Profile
                             </Link>
+                            <Link href="/favorites" className="text-gray-600 hover:text-gray-900">
+                                Favoris
+                            </Link>
                             <button onClick={() => signOut()} className="text-gray-600 hover:text-gray-900">
                                 Logout
                             </button>
