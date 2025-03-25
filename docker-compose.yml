@@ -21,8 +21,6 @@ services:
     container_name: demo-docker-nextjs
     ports:
       - "80:80"
-    env_file:
-      - .env.local
 
 volumes:
   node_modules:
