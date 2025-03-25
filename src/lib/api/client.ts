@@ -1,29 +1,35 @@
 import { HTTPError, Recipe, User, UserFavorite, GetFavoritesByUserRow } from "@/types";
+import Cookies from "js-cookie";
 
 // Use relative URLs for our Next.js API routes
-const API_BASE_URL = "/api";
+const API_BASE_URL = "https://gourmet.cours.quimerch.com";
+
+const PROTECTED_ROUTES = ["/login", "/me", "/favorites"];
 
 /**
  * Custom fetch function to interact with the Gourmet API via our Next.js API routes
  */
+
 export async function apiFetch<T>(
-  endpoint: string,
-  options: RequestInit = {}
+    endpoint: string,
+    options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   // Set default headers
   const headers: Record<string, string> = {
     "Accept": "application/json",
     ...(options.headers as Record<string, string> || {}),
   };
 
-  // Get the token from localStorage if it exists
-  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-  
-  // Add authorization header if token exists
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+  if(endpoint in PROTECTED_ROUTES) {
+    // Get the token from cookies
+    const token = Cookies.get("auth_token");
+
+    // Add authorization header if token exists
+    if (token) {
+      headers["Authorization"] = token;
+    }
   }
 
   const config: RequestInit = {
@@ -33,7 +39,7 @@ export async function apiFetch<T>(
 
   try {
     const response = await fetch(url, config);
-    
+
     // Handle non-JSON responses
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") === -1) {
@@ -65,6 +71,51 @@ export async function apiFetch<T>(
 }
 
 /**
+ * API functions for user authentication
+ */
+export const authApi = {
+  // Login user
+  login: async (credentials: { username: string; password: string }) => {
+    // Remove existing token
+    Cookies.remove("auth_token");
+
+    // Call the login endpoint
+    const { token } = await apiFetch<{ token: string }>("/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    // Store the token in a cookie - format must match what your API expects
+    Cookies.set("auth_token", `Bearer ${token}`, { expires: 7, sameSite: "strict", path: "/"});
+
+    // Fetch user details
+    const user = await apiFetch<User>("/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return {
+      id: user.username,
+      name: user.full_name,
+      email: user.email,
+      token: token
+    };
+  },
+
+  // Get current user info
+  getMe: () => apiFetch<User>("/me"),
+
+  // Logout user (client-side only, just removes the token)
+  logout: () => {
+    Cookies.remove("auth_token");
+    return Promise.resolve();
+  },
+};
+
+
+/**
  * API functions for recipes
  */
 export const recipesApi = {
@@ -81,28 +132,6 @@ export const recipesApi = {
   search: (query: string) => apiFetch<Recipe[]>(`/search?q=${encodeURIComponent(query)}`),
 };
 
-/**
- * API functions for user authentication
- */
-export const authApi = {
-  // Login user
-  login: (credentials: { username: string; password: string }) => 
-    apiFetch<{ token: string }>("/login", {
-      method: "POST",
-      body: JSON.stringify(credentials),
-    }),
-  
-  // Get current user info
-  getMe: () => apiFetch<User>("/me"),
-  
-  // Logout user (client-side only, just removes the token)
-  logout: () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token");
-    }
-    return Promise.resolve();
-  },
-};
 
 /**
  * API functions for favorites

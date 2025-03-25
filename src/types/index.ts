@@ -18,6 +18,7 @@ export interface Recipe {
 }
 
 export interface User {
+  id: string;
   username: string;
   full_name: string;
   email: string;
@@ -50,6 +51,6 @@ export interface HTTPError {
   errors?: Array<{
     name: string;
     reason: string;
-    more: Record<string, any>;
+    more: Record<string, never>;
   }>;
 }
