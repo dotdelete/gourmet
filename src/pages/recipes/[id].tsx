@@ -13,6 +13,7 @@ import {
   ActivityIcon,
 } from "lucide-react";
 import { useMemo } from "react";
+import FavoriteButton from "@/components/FavoriteButton";
 
 interface RecipeDetailsProps {
   recipe: Recipe;
@@ -74,6 +75,9 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe }) => {
             sizes="(max-width: 1200px) 100vw, 1200px"
             style={{ objectFit: "cover" }}
           />
+          <div className="absolute top-4 right-4 z-10">
+            <FavoriteButton recipeId={recipe.id} variant="contained" />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end">
             <div className="p-8 w-full">
               <h1 className="text-4xl font-extrabold text-white mb-2">
