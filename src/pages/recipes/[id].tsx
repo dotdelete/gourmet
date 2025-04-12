@@ -7,7 +7,6 @@ import PageLayout from "@/components/layout/PageLayout";
 import {
   ClockIcon,
   UsersIcon,
-  TagIcon,
   CalendarIcon,
   DollarSignIcon,
   ActivityIcon,
@@ -102,7 +101,7 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe }) => {
             <div className="flex items-center gap-2">
               <ClockIcon className="w-5 h-5 text-orange-500" />
               <div>
-                <p className="text-xs text-gray-500">Cook Time</p>
+                <p className="text-xs text-gray-500">Cooking Time</p>
                 <p className="font-medium">{recipe.cook_time} min</p>
               </div>
             </div>
@@ -116,7 +115,7 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe }) => {
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-5 h-5 text-orange-500" />
               <div>
-                <p className="text-xs text-gray-500">When to Eat</p>
+                <p className="text-xs text-gray-500">Type</p>
                 <p className="font-medium">{recipe.when_to_eat}</p>
               </div>
             </div>
@@ -125,21 +124,13 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe }) => {
           {/* Main Content */}
           <div className="p-6">
             <div className="mb-6">
-              <div className="flex gap-2 items-center mb-2">
-                <TagIcon className="w-5 h-5 text-orange-500" />
-                <h3 className="text-lg font-semibold">Category</h3>
-              </div>
-              <p className="ml-7 text-gray-700">{recipe.category}</p>
-            </div>
-
-            <div className="mb-6">
               <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
                 Instructions
               </h3>
               <div className="whitespace-pre-line text-gray-700 leading-relaxed">
                 {instructionsFiltered.map((instruction, index) => (
-                  <div key={index} className="mb-4 flex">
-                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-orange-100 text-orange-800 font-medium text-sm mr-2 flex-shrink-0 mt-1">
+                  <div key={index} className="mb-4 flex items-start">
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-orange-100 text-orange-800 font-medium text-sm mr-2 flex-shrink-0">
                       {index + 1}
                     </span>
                     <p>{instruction}</p>
@@ -148,25 +139,33 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe }) => {
               </div>
             </div>
 
-            {/* Additional Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 bg-gray-50 p-4 rounded-lg">
-              {recipe.calories && (
-                <div className="flex items-center gap-2">
-                  <ActivityIcon className="w-5 h-5 text-orange-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Calories</p>
-                    <p className="font-medium">{recipe.calories}</p>
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              {(
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-orange-100 rounded-full">
+                        <ActivityIcon className="w-5 h-5 text-orange-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Calories</p>
+                        <p className="font-medium text-gray-800">{recipe.calories}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
               )}
-              {recipe.cost && (
-                <div className="flex items-center gap-2">
-                  <DollarSignIcon className="w-5 h-5 text-orange-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Estimated Cost</p>
-                    <p className="font-medium">${recipe.cost.toFixed(2)}</p>
+
+              {(
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-orange-100 rounded-full">
+                        <DollarSignIcon className="w-5 h-5 text-orange-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Estimated Cost</p>
+                        <p className="font-medium text-gray-800">${recipe.cost?.toFixed(2)}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
               )}
             </div>
 
