@@ -163,14 +163,12 @@ describe('API Client', () => {
       // Mock second fetch for user data
       const mockUserResponse = createMockResponse(userResponse);
       
-      mockFetch.mockResolvedValueOnce(mockTokenResponse).mockResolvedValueOnce(mockUserResponse);
-
-      // Execute
-      console.log('Executing login...');
-      console.log("credentials", credentials);
-      const result = await authApi.login(credentials);
-
-      // Verify
+       mockFetch.mockResolvedValueOnce(mockTokenResponse).mockResolvedValueOnce(mockUserResponse);
+ 
+       // Execute
+       const result = await authApi.login(credentials);
+ 
+       // Verify
       expect(mockFetch).toHaveBeenCalledTimes(2);
       expect(Cookies.set).toHaveBeenCalledWith(
         'auth_token',

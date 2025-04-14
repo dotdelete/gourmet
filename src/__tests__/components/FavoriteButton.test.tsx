@@ -23,6 +23,36 @@ jest.mock('@/components/icons', () => ({
   HeartSolidIcon: () => <span data-testid="heart-solid-icon">♥</span>,
 }));
 
+// Mock the CustomEventSource used in FavoriteButton
+jest.mock('@/components/FavoriteButton', () => {
+  const originalModule = jest.requireActual('@/components/FavoriteButton');
+  return {
+    ...originalModule,
+    __esModule: true,
+    // Use a more specific type for props if possible, e.g., React.ComponentProps<typeof originalModule.default>
+    // For simplicity in this example, we'll keep it basic, but avoid 'any' in production code.
+    // Let's assume FavoriteButtonProps is the correct type if exported, otherwise define inline or use a broader type.
+    // If FavoriteButtonProps is not exported, define a minimal interface here or use React.ComponentProps<typeof originalModule.default>
+    default: (props: React.ComponentProps<typeof originalModule.default>) => {
+      // Mock the CustomEventSource part specifically for the test environment
+      // You might need to adjust this mock based on how CustomEventSource is used
+      const MockedFavoriteButton = originalModule.default;
+      // Replace the actual CustomEventSource usage within the component if possible,
+      // or mock its behavior more directly if it's instantiated inside.
+      // For simplicity here, we just render the original button but acknowledge the mock setup.
+      // A more robust mock might involve spying on or replacing the CustomEventSource instance.
+      return <MockedFavoriteButton {...props} />;
+    },
+    // If CustomEventSource is exported and used directly, mock it here too:
+    // CustomEventSource: jest.fn().mockImplementation(() => ({
+    //   addEventListener: jest.fn(),
+    //   connect: jest.fn(),
+    //   close: jest.fn(),
+    // })),
+  };
+});
+
+
 describe('FavoriteButton', () => {
   const mockSession = {
     data: {
@@ -47,6 +77,27 @@ describe('FavoriteButton', () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: { href: '' },
+    });
+
+    // Mock fetch specifically for the SSE endpoint to prevent the error
+    const mockFetch = global.fetch as jest.Mock;
+    mockFetch.mockImplementation((url) => {
+      if (url.toString().includes('/stars')) {
+        // Return a mock response for the SSE endpoint
+        return Promise.resolve({
+          ok: true,
+          headers: new Headers({ 'content-type': 'text/event-stream' }),
+          // Replace ReadableStream with null or a simpler mock if stream reading isn't tested
+          body: null, 
+          // Add other necessary Response properties if needed by the component
+          status: 200,
+          statusText: 'OK',
+          clone: jest.fn(),
+          // ... other properties
+        } as unknown as Response);
+      }
+      // Fallback for other fetch calls if necessary, or return a default mock response
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response);
     });
   });
 
